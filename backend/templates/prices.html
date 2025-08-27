@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+{# ---------- Helpers ---------- #}
+{% macro humanize_cap(v) -%}
+{%- if v is not none -%}
+{%- set n = v|float -%}
+{%- if n >= 1_000_000_000_000 -%}
+${{ ('%.1f' % (n/1_000_000_000_000)).rstrip('0').rstrip('.') }}T
+{%- elif n >= 1_000_000_000 -%}
+${{ ('%.0f' % (n/1_000_000_000)) }}B
+{%- elif n >= 1_000_000 -%}
+${{ ('%.0f' % (n/1_000_000)) }}M
+{%- else -%}
+${{ '{:,.0f}'.format(n) }}
+{%- endif -%}
+{%- else -%}
+—
+{%- endif -%}
+{%- endmacro %}
+
+<section class="page-header">
+    <h2 class="page-title">Live Market Prices</h2>
+    <p class="page-sub">Check the latest live prices and trends across top cryptocurrencies.</p>
+
+    <form class="search-row" action="{{ url_for('prices') }}" method="get">
+        <input id="liveSearch" class="input" type="text" name="search" value="{{ request.args.get('search','') }}"
+               placeholder="Search coins… (e.g., bitcoin, btc)">
+        <button class="btn btn-gold" type="submit">Search</button>
+    </form>
+</section>
+
+<section class="card table-wrap">
+    <table class="market-table" id="marketTable">
+        <thead>
+        <tr>
+            <th class="coin-col">Coin</th>
+            <th class="num">Price</th>
+            <th class="num">24h Change</th>
+            <th class="num">Market Cap</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for c in coins %}
+        <tr>
+            <td class="coin-cell">
+                <img src="{{ c['image'] }}" alt="{{ c['symbol']|upper }} logo" loading="lazy">
+                <div class="coin-meta">
+                    <div class="coin-name">{{ c['name'] }}</div>
+                    <div class="coin-symbol">{{ c['symbol']|upper }}</div>
+                </div>
+            </td>
+
+            <td class="num">${{ '{:,.2f}'.format(c['current_price'] or 0) }}</td>
+
+            {% set ch = c['price_change_percentage_24h'] %}
+            <td class="num {{ 'pos' if (ch or 0) >= 0 else 'neg' }}">
+                {{ ('+' if (ch or 0) >= 0 else '') }}{{ '%.2f'|format(ch or 0) }}%
+            </td>
+
+            <td class="num">{{ humanize_cap(c.get('market_cap')) }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<script>
+    // Simple instant client-side filter (keeps your server search too)
+    const input = document.getElementById('liveSearch');
+    const rows = Array.from(document.querySelectorAll('#marketTable tbody tr'));
+    input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        rows.forEach(tr => {
+            const text = tr.innerText.toLowerCase();
+            tr.style.display = text.includes(q) ? '' : 'none';
+        });
+    });
+</script>
+
+{% endblock %}

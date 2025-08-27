@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Coin to Portfolio</h2>
+
+<form method="POST" action="{{ url_for('add_coin') }}" style="max-width: 400px; margin: 20px auto;">
+    <label for="coin_id">Coin ID</label><br>
+    <input type="text" id="coin_id" name="coin_id" placeholder="e.g., bitcoin" required><br><br>
+
+    <label for="name">Name</label><br>
+    <input type="text" id="name" name="name" placeholder="e.g., Bitcoin" required><br><br>
+
+    <label for="symbol">Symbol</label><br>
+    <input type="text" id="symbol" name="symbol" placeholder="e.g., BTC" required><br><br>
+
+    <label for="quantity">Quantity</label><br>
+    <input type="number" id="quantity" name="quantity" step="0.0001" placeholder="e.g., 0.05" required><br><br>
+
+    <button type="submit">Add Coin</button>
+</form>
+
+<p style="text-align: center;">
+    <a href="{{ url_for('portfolio') }}" style="color: gold;">← Back to Portfolio</a>
+</p>
+{% endblock %}

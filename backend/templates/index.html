@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero hero-tight hero-with-bg hero-animate">
+    <div class="hero-glow"></div>
+    <h2 class="hero-title">
+    <span class="hero-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="gold" stroke-width="2"/>
+        <path d="M9 16h3.5a3 3 0 0 0 0-6H9m3.2 0H9m3.3 6H9"
+              stroke="gold" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </span>
+        Welcome to Crypto Tracker
+    </h2>
+    <p class="hero-sub">Track your investments and stay updated with live prices.</p>
+</section>
+
+<section class="stats stats-centered">
+    <div class="stat-box stat-card">
+        <h3>${{ '{:,.2f}'.format(total_value) }}</h3>
+        <p>Total Portfolio Value</p>
+    </div>
+    <div class="stat-box stat-card">
+        <h3>{{ coins_tracked }}</h3>
+        <p>Coins Tracked</p>
+    </div>
+    <div class="stat-box stat-card">
+        <h3>{{ '{:,.2f}'.format(change_24h) }}%</h3>
+        <p>24h Change</p>
+    </div>
+</section>
+
+<section class="chart">
+    <h3 class="section-title">Bitcoin – 7 Day Price Chart</h3>
+    <canvas id="btcChart"></canvas>
+</section>
+
+<section class="home-grid">
+    <div class="panel">
+        <div class="panel-header">Top Coins</div>
+        <ul class="top-list">
+            {% for coin in coins[:5] %}
+            <li class="top-row">
+                <div class="top-left">
+                    <img src="{{ coin['image'] }}" alt="{{ coin['name'] }}" loading="lazy">
+                    <div class="top-meta">
+                        <div class="top-name">{{ coin['name'] }}</div>
+                        <div class="top-symbol">{{ coin['symbol'].upper() }}</div>
+                    </div>
+                </div>
+                <div class="top-right">
+                    <div class="top-price">${{ '{:,.2f}'.format(coin['current_price']) }}</div>
+                    <div class="top-change {% if coin['price_change_percentage_24h'] >= 0 %}pos{% else %}neg{% endif %}">
+                        {{ '%.2f'|format(coin['price_change_percentage_24h'] or 0) }}%
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <a class="panel cta" href="{{ url_for('portfolio') }}">
+        <div>
+            <div class="cta-title">Check Your Portfolio</div>
+            <div class="cta-sub">View detailed breakdown of your holdings.</div>
+        </div>
+        <div class="cta-arrow">→</div>
+    </a>
+</section>
+
+<script>
+    const ctx = document.getElementById('btcChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels|tojson }},
+    datasets: [{
+        label: 'BTC Price (USD)',
+        data: {{ values|tojson }},
+    borderColor: 'gold',
+        backgroundColor: 'rgba(255, 215, 0, 0.12)',
+        borderWidth: 3,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: 'gold',
+        fill: true,
+        tension: 0.25
+    }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { labels: { color: '#fff' } },
+            tooltip: {
+                enabled: true,
+                    backgroundColor: '#222',
+                    borderColor: '#444',
+                    borderWidth: 1,
+                    titleColor: '#ffd54d',
+                    bodyColor: '#fff',
+                    displayColors: false,
+                    callbacks: {
+                    title(items) { return items[0].label || ''; },
+                    label(context) {
+                        const price = context.parsed.y;
+                        return ` ${price.toLocaleString('en-US',{style:'currency',currency:'USD'})}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#bbb', maxRotation: 0 }, grid: { color: '#2a2a2a' } },
+            y: { ticks: { color: '#bbb' }, grid: { color: '#2a2a2a' } }
+        }
+    }
+    });
+</script>
+{% endblock %}
