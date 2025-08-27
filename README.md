@@ -34,15 +34,3 @@ The goal of this project was to create a real, working tool rather than a static
 
 ---
 
-## Screenshots
-
-_(Insert screenshots of Home, Live Prices, Portfolio, Contact page – these will help recruiters see the UI at a glance.)_
-
----
-
-## Installation & Usage
-
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/Adzz29/Crypto-Tracker.git
-   cd Crypto-Tracker
